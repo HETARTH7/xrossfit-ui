@@ -2,15 +2,31 @@
 
 import React, { useState } from "react";
 import { Container, Box, TextField, Button, Typography } from "@mui/material";
+import axios from "../api/axios";
+import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Email:", email, "Password:", password);
-  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      try {
+        const responseBody = {email, password};
+        
+        const response = await axios.post("/auth/login", responseBody);
+        const json = await response.data;
+        toast.success("Login Sucess! Welcome.");
+        console.log(json);
+        
+      } catch (error) {
+        if(error instanceof AxiosError){
+          toast.error(error.response?.data.error);
+          console.error(error.message+": "+error.response?.data.error)
+        }
+      }
+    };
 
   return (
     <Container maxWidth="xs">
