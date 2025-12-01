@@ -12,39 +12,96 @@ import Link from "next/link";
 import axios from "../api/axios";
 import { toast, ToastContainer } from "react-toastify";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 
 export default function Signup() {
-  const [displayName, setDisplayName] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const router = useRouter();
+
+  const [form, setForm] = useState({
+    displayName: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [errors, setErrors] = useState({
+    displayName: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateField = (name: string, value: string) => {
+    let error = "";
+
+    switch (name) {
+      case "email":
+        if (!/\S+@\S+\.\S+/.test(value)) error = "Invalid email address";
+        break;
+
+      case "password":
+        if (value.length < 6) error = "Password must be at least 6 characters";
+        break;
+
+      case "confirmPassword":
+        if (value !== form.password) error = "Passwords do not match";
+        break;
+
+      default:
+        if (!value.trim()) error = "This field is required";
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: error }));
+    return error;
+  };
+
+  const validateAll = () => {
+    const newErrors: any = {};
+
+    Object.keys(form).forEach((key) => {
+      // @ts-ignore
+      newErrors[key] = validateField(key, form[key]);
+    });
+
+    return newErrors;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const fieldErrors = validateAll();
+    if (Object.values(fieldErrors).some((e) => e !== "")) return;
+
     try {
-      if (password !== confirmPassword) {
-        return;
-      }
-      const responseBody = {displayName, firstName, lastName, email, password};
-      
-      const response = await axios.post("/auth/signup", responseBody);
+      const response = await axios.post("/auth/signup", form);
       const json = await response.data;
-      toast.success("Signup Sucess! Welcome.");
+      toast.success("Signup Success! Welcome.");
       console.log(json);
-      
+      router.push("/confirm-email");
     } catch (error) {
-      if(error instanceof AxiosError){
+      if (error instanceof AxiosError) {
         toast.error(error.response?.data.error);
-        console.error(error.message+": "+error.response?.data.error)
+        console.error(error.message + ": " + error.response?.data.error);
       }
     }
   };
 
   return (
     <Container maxWidth="xs">
-      <ToastContainer/>
+      <ToastContainer />
       <Box
         display="flex"
         flexDirection="column"
@@ -55,64 +112,88 @@ export default function Signup() {
         <Typography variant="h4" gutterBottom>
           Sign Up
         </Typography>
+
         <Box component="form" onSubmit={handleSubmit} width="100%">
           <Box display="flex" gap={2}>
             <TextField
               fullWidth
               label="Display Name"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value || "")}
+              name="displayName"
+              value={form.displayName}
+              onChange={handleChange}
+              onBlur={(e) => validateField("displayName", e.target.value)}
+              error={Boolean(errors.displayName)}
+              helperText={errors.displayName}
             />
+
             <TextField
               fullWidth
               label="Email"
+              name="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              value={form.email}
+              onChange={handleChange}
+              onBlur={(e) => validateField("email", e.target.value)}
+              error={Boolean(errors.email)}
+              helperText={errors.email}
             />
           </Box>
+
           <Box mt={2} display="flex" gap={2}>
             <TextField
               fullWidth
               label="First Name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value || "")}
+              name="firstName"
+              value={form.firstName}
+              onChange={handleChange}
+              onBlur={(e) => validateField("firstName", e.target.value)}
+              error={Boolean(errors.firstName)}
+              helperText={errors.firstName}
             />
+
             <TextField
               fullWidth
               label="Last Name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value || "")}
+              name="lastName"
+              value={form.lastName}
+              onChange={handleChange}
+              onBlur={(e) => validateField("lastName", e.target.value)}
+              error={Boolean(errors.lastName)}
+              helperText={errors.lastName}
             />
           </Box>
+
           <Box mt={2} display="flex" gap={2}>
             <TextField
               fullWidth
               label="Password"
+              name="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              value={form.password}
+              onChange={handleChange}
+              onBlur={(e) => validateField("password", e.target.value)}
+              error={Boolean(errors.password)}
+              helperText={errors.password}
             />
 
             <TextField
               fullWidth
               label="Confirm Password"
+              name="confirmPassword"
               type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
+              value={form.confirmPassword}
+              onChange={handleChange}
+              onBlur={(e) => validateField("confirmPassword", e.target.value)}
+              error={Boolean(errors.confirmPassword)}
+              helperText={errors.confirmPassword}
             />
           </Box>
+
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 3 }}>
             Sign Up
           </Button>
-          <Typography
-            variant="body2"
-            textAlign="center"
-            mt={2}
-          >
+
+          <Typography variant="body2" textAlign="center" mt={2}>
             Already have an account?{" "}
             <Link href="/login" style={{ color: "#1976d2" }}>
               Login

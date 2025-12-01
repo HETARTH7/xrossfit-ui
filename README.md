@@ -29,12 +29,11 @@ Users can log workouts and shop for fitness equipments.
    cd xrossfit-ui
    ```
 2. Import the project into your IDE.
-3. Configure your database in `application.properties`.
-4. Install dependencies
+3. Install dependencies
     ```
     npm install
     ```
-5. Run Next.js app
+4. Run Next.js app
     ```
     npm run dev
     ```
