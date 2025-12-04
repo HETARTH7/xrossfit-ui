@@ -72,7 +72,7 @@ export default function Login() {
       const json = await response.data;
       toast.success("Login Success! Welcome.");
       console.log(json);
-      router.push("/confirm-email");
+      json.emailVerified ? router.push('/home') : router.push(`/confirm-email/${form.email}`);
     } catch (error) {
       if (error instanceof AxiosError) {        
         toast.error(error.response?.data.error);
