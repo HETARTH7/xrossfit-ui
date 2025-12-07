@@ -13,7 +13,7 @@ Users can log workouts and shop for fitness equipments.
 
 ## 🛠️ Tech Stack
 
-* **Framework**: Next.js 13+/14 (App Router)
+* **Framework**: Next.js 15
 * **Language**: TypeScript
 * **Styling**: Tailwind CSS, MaterialUI
 * **HTTP Client**: Axios
@@ -37,3 +37,8 @@ Users can log workouts and shop for fitness equipments.
     ```
     npm run dev
     ```
+
+## Todo
+
+* State Management
+* OAuth 2.0/Firebase/Google auth

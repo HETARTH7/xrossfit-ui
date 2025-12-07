@@ -1,7 +1,5 @@
-'use client'
+"use client";
 
-import ConfirmEmail from "@/app/components/ConfirmEmail";
-
-export default function ConfirmEmailPage(){
-    return <ConfirmEmail/>
+export default function ConfirmEmailPage() {
+  return <div>Confirm Email</div>;
 }

@@ -1,0 +1,38 @@
+.
+├── public/
+├── src/
+│   ├── app/ (App Router routes)
+│   │   ├── (auth)/ (Route Group for authentication-related routes)
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx
+│   │   │   └── register/
+│   │   │       └── page.tsx
+│   │   ├── dashboard/
+│   │   │   ├── page.tsx
+│   │   │   ├── layout.tsx
+│   │   │   └── settings/
+│   │   │       └── page.tsx
+│   │   ├── page.tsx (Homepage)
+│   │   └── layout.tsx (Root layout)
+│   ├── components/
+│   │   ├── common/ (Reusable UI components)
+│   │   │   ├── Button.tsx
+│   │   │   └── Modal.tsx
+│   │   ├── feature-specific/ (Components related to specific features)
+│   │   │   ├── UserProfileCard.tsx
+│   │   │   └── ProductGrid.tsx
+│   ├── lib/ (Utility functions, constants, types, etc.)
+│   │   ├── utils.ts
+│   │   ├── constants.ts
+│   │   └── types.ts
+│   ├── hooks/ (Custom React Hooks)
+│   │   └── useAuth.ts
+│   ├── services/ (API interaction and data fetching logic)
+│   │   └── authService.ts
+│   ├── styles/ (Global styles or Tailwind CSS configuration)
+│   │   └── globals.css
+│   └── middleware.ts (Optional: Next.js Middleware)
+├── next.config.mjs
+├── tsconfig.json (if using TypeScript)
+├── package.json
+└── README.md
