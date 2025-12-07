@@ -6,8 +6,16 @@ import { toast, ToastContainer } from "react-toastify";
 import { AxiosError } from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AuthServices } from "@/lib/services/authServices";
-import { LoginResponse } from "@/api/types/auth/LoginResponse";
+import { AuthServices } from "@/lib/services/AuthService";
+import { LoginResponse } from "@/lib/types/auth/LoginResponse";
+import { AuthStorageService } from "@/lib/services/AuthStorageService";
+import {
+  EMAIL_REGEX,
+  MSG_LOGIN_SUCCESS,
+  ROUTE_ADMIN,
+  ROUTE_CONFIRM_EMAIL,
+  ROUTE_HOME,
+} from "@/lib/constants";
 
 export default function Login() {
   const router = useRouter();
@@ -37,7 +45,7 @@ export default function Login() {
     switch (name) {
       case "email":
         if (!value.trim()) error = "Email is required";
-        else if (!/\S+@\S+\.\S+/.test(value)) error = "Invalid email address";
+        else if (!EMAIL_REGEX.test(value)) error = "Invalid email address";
         break;
 
       case "password":
@@ -70,11 +78,16 @@ export default function Login() {
 
     try {
       const loginResponse: LoginResponse = await AuthServices.login(form);
-      toast.success("Login Success! Welcome.");
-      console.log(loginResponse);
-      loginResponse.emailVerified
-        ? router.push("/home")
-        : router.push(`/confirm-email/${form.email}`);
+      toast.success(MSG_LOGIN_SUCCESS);
+      AuthStorageService.saveAuth(
+        loginResponse.token,
+        loginResponse.displayName
+      );
+      !loginResponse.emailVerified
+        ? router.push(`${ROUTE_CONFIRM_EMAIL}/${form.email}`)
+        : loginResponse.role == "USER"
+        ? router.push(ROUTE_HOME)
+        : router.push(ROUTE_ADMIN);
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data.error);

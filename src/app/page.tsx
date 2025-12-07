@@ -1,5 +1,6 @@
 "use client";
 
+import { ROUTE_LOGIN, ROUTE_SIGNUP } from "@/lib/constants";
 import { Box, Button, Container, Typography } from "@mui/material";
 import Link from "next/link";
 
@@ -22,10 +23,10 @@ export default function Landing() {
         </Typography>
         <Box>
           <Button>
-            <Link href={"/login"}>Login</Link>
+            <Link href={ROUTE_LOGIN}>Login</Link>
           </Button>
           <Button>
-            <Link href={"/signup"}>Signup</Link>
+            <Link href={ROUTE_SIGNUP}>Signup</Link>
           </Button>
         </Box>
       </Box>

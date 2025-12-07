@@ -6,7 +6,14 @@ import Link from "next/link";
 import { toast, ToastContainer } from "react-toastify";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { AuthServices } from "@/lib/services/authServices";
+import { AuthServices } from "@/lib/services/AuthService";
+import { AuthStorageService } from "@/lib/services/AuthStorageService";
+import {
+  EMAIL_REGEX,
+  MSG_SIGNUP_SUCCESS,
+  ROUTE_CONFIRM_EMAIL,
+  ROUTE_HOME,
+} from "@/lib/constants";
 
 export default function Signup() {
   const router = useRouter();
@@ -43,7 +50,7 @@ export default function Signup() {
 
     switch (name) {
       case "email":
-        if (!/\S+@\S+\.\S+/.test(value)) error = "Invalid email address";
+        if (!EMAIL_REGEX.test(value)) error = "Invalid email address";
         break;
 
       case "password":
@@ -81,11 +88,14 @@ export default function Signup() {
 
     try {
       const signupResponse = await AuthServices.signup(form);
-      toast.success("Signup Success! Welcome.");
-      console.log(signupResponse);
+      toast.success(MSG_SIGNUP_SUCCESS);
+      AuthStorageService.saveAuth(
+        signupResponse.token,
+        signupResponse.displayName
+      );
       signupResponse.emailVerified
-        ? router.push("/home")
-        : router.push(`/confirm-email/${form.email}`);
+        ? router.push(ROUTE_HOME)
+        : router.push(`${ROUTE_CONFIRM_EMAIL}/${form.email}`);
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data.error);
