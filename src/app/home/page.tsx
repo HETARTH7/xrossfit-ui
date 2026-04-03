@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField, Autocomplete, Button, MenuItem } from "@mui/material";
+import { Exercise } from "@/lib/interfaces/workouttracker/Exercise";
+import axios from "@/api/axios";
+import Navbar from "@/components/Navbar";
+import { AuthStorageService } from "@/lib/services/AuthStorageService";
 
-// ---------------- TYPES ----------------
 type MetricType = "number" | "text" | "select";
 
 interface Metric {
@@ -14,16 +17,10 @@ interface Metric {
   options?: string[];
 }
 
-interface Exercise {
-  id: string;
-  name: string;
-}
-
-// ---------------- MOCK DATA ----------------
 const mockExercises: Exercise[] = [
-  { id: "1", name: "Running" },
-  { id: "2", name: "Weight Lifting" },
-  { id: "3", name: "Cycling" },
+  { id: "1", exerciseName: "Running", exerciseType: "Cardio" },
+  { id: "2", exerciseName: "Weight Lifting", exerciseType: "Strength" },
+  { id: "3", exerciseName: "Cycling", exerciseType: "Cardio" },
 ];
 
 const mockMetricsByExercise: Record<string, Metric[]> = {
@@ -51,9 +48,29 @@ export default function WorkoutTracker() {
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
     null,
   );
-
+  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
+
+  const fetchExercises = async () => {
+    try {
+      const response = await axios.get<Exercise[]>(
+        "/workout-tracker/exerciseNames",
+        {
+          headers: {
+            Authorization: `Bearer ${AuthStorageService.getToken()}`,
+          },
+        },
+      );
+      setExercises(response.data);
+    } catch (error) {
+      console.error("Error fetching exercises:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchExercises();
+  }, []);
 
   const fetchMetrics = (exerciseId: string) => {
     return mockMetricsByExercise[exerciseId] || [];
@@ -92,71 +109,74 @@ export default function WorkoutTracker() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center items-start p-6">
-      <div className="w-full max-w-2xl bg-white shadow-md rounded-xl p-6 space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Workout Tracker
-        </h1>
+    <div>
+      <Navbar />
+      <div className="min-h-screen bg-gray-50 flex justify-center items-start p-6">
+        <div className="w-full max-w-2xl bg-white shadow-md rounded-xl p-6 space-y-6">
+          <h1 className="text-2xl font-semibold text-gray-800">
+            Workout Tracker
+          </h1>
 
-        {/* Exercise Dropdown */}
-        <Autocomplete
-          options={mockExercises}
-          getOptionLabel={(option) => option.name}
-          value={selectedExercise}
-          onChange={handleExerciseChange}
-          renderInput={(params) => (
-            <TextField {...params} label="Select Exercise" fullWidth />
-          )}
-        />
+          {/* Exercise Dropdown */}
+          <Autocomplete
+            options={exercises}
+            getOptionLabel={(option) => option.exerciseName}
+            value={selectedExercise}
+            onChange={handleExerciseChange}
+            renderInput={(params) => (
+              <TextField {...params} label="Select Exercise" fullWidth />
+            )}
+          />
 
-        {/* Dynamic Metrics Form */}
-        {metrics.length > 0 && (
-          <div className="space-y-4">
-            {metrics.map((metric) => {
-              if (metric.type === "select") {
+          {/* Dynamic Metrics Form */}
+          {metrics.length > 0 && (
+            <div className="space-y-4">
+              {metrics.map((metric) => {
+                if (metric.type === "select") {
+                  return (
+                    <TextField
+                      key={metric.id}
+                      select
+                      fullWidth
+                      label={metric.name}
+                      value={formValues[metric.id] || ""}
+                      onChange={(e) => handleChange(metric.id, e.target.value)}
+                    >
+                      {metric.options?.map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  );
+                }
+
                 return (
                   <TextField
                     key={metric.id}
-                    select
+                    type={metric.type}
                     fullWidth
-                    label={metric.name}
+                    label={`${metric.name} ${
+                      metric.unit ? `(${metric.unit})` : ""
+                    }`}
                     value={formValues[metric.id] || ""}
                     onChange={(e) => handleChange(metric.id, e.target.value)}
-                  >
-                    {metric.options?.map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                  />
                 );
-              }
+              })}
+            </div>
+          )}
 
-              return (
-                <TextField
-                  key={metric.id}
-                  type={metric.type}
-                  fullWidth
-                  label={`${metric.name} ${
-                    metric.unit ? `(${metric.unit})` : ""
-                  }`}
-                  value={formValues[metric.id] || ""}
-                  onChange={(e) => handleChange(metric.id, e.target.value)}
-                />
-              );
-            })}
-          </div>
-        )}
-
-        {/* Submit Button */}
-        <Button
-          variant="contained"
-          fullWidth
-          disabled={!selectedExercise}
-          onClick={handleSubmit}
-        >
-          Add Workout
-        </Button>
+          {/* Submit Button */}
+          <Button
+            variant="contained"
+            fullWidth
+            disabled={!selectedExercise}
+            onClick={handleSubmit}
+          >
+            Add Workout
+          </Button>
+        </div>
       </div>
     </div>
   );
