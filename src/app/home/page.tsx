@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import { AuthStorageService } from "@/lib/services/AuthStorageService";
 import { ExerciseDetails } from "@/lib/interfaces/workouttracker/ExerciseDetails";
 import { Metrics } from "@/lib/interfaces/workouttracker/Metrics";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function WorkoutTracker() {
   const token = AuthStorageService.getToken();
@@ -66,7 +67,6 @@ export default function WorkoutTracker() {
 
       setMetrics(exerciseDetails.metrics);
 
-      // initialize form values
       const initialValues: Record<number, string> = {};
       exerciseDetails.metrics.forEach((m) => {
         initialValues[m.id] = "";
@@ -85,17 +85,40 @@ export default function WorkoutTracker() {
     }));
   };
 
-  const handleSubmit = () => {
-    console.log({
-      exerciseId: selectedExercise?.id,
-      metrics: formValues,
-    });
+  const handleSubmit = async () => {
+    if (!selectedExercise) return;
+
+    try {
+      const payload = {
+        exerciseId: selectedExercise.id,
+        loggedAt: new Date().toISOString(),
+        metrics: Object.entries(formValues).map(([metricId, value]) => ({
+          metricId: Number(metricId),
+          value: Number(value),
+        })),
+      };
+
+      const response = await axios.post("/workout-tracker/log", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Workout logged successfully:", response.data);
+      setSelectedExercise(null);
+      setMetrics([]);
+      setFormValues({});
+      toast.success("Workout logged successfully!");
+    } catch (error) {
+      console.error("Error saving workout:", error);
+      toast.error("Failed to log workout. Please try again.");
+    }
   };
 
   return (
     <div>
       <Navbar />
-
+      <ToastContainer />
       <div className="min-h-screen bg-gray-50 flex justify-center items-start p-6">
         <div className="w-full max-w-2xl bg-white shadow-md rounded-xl p-6 space-y-6">
           <h1 className="text-2xl font-semibold text-gray-800">
