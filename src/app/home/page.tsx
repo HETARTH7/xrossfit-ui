@@ -6,6 +6,7 @@ import { Exercise } from "@/lib/interfaces/workouttracker/Exercise";
 import axios from "@/api/axios";
 import Navbar from "@/components/Navbar";
 import { AuthStorageService } from "@/lib/services/AuthStorageService";
+import { ExerciseDetails } from "@/lib/interfaces/workouttracker/ExerciseDetails";
 
 type MetricType = "number" | "text" | "select";
 
@@ -18,17 +19,17 @@ interface Metric {
 }
 
 const mockExercises: Exercise[] = [
-  { id: "1", exerciseName: "Running", exerciseType: "Cardio" },
-  { id: "2", exerciseName: "Weight Lifting", exerciseType: "Strength" },
-  { id: "3", exerciseName: "Cycling", exerciseType: "Cardio" },
+  { id: 1, exerciseName: "Running", exerciseType: "Cardio" },
+  { id: 2, exerciseName: "Weight Lifting", exerciseType: "Strength" },
+  { id: 3, exerciseName: "Cycling", exerciseType: "Cardio" },
 ];
 
-const mockMetricsByExercise: Record<string, Metric[]> = {
-  "1": [
+const mockMetricsByExercise: Record<number, Metric[]> = {
+  1: [
     { id: "distance", name: "Distance", type: "number", unit: "km" },
     { id: "duration", name: "Duration", type: "number", unit: "min" },
   ],
-  "2": [
+  2: [
     { id: "weight", name: "Weight", type: "number", unit: "kg" },
     { id: "reps", name: "Reps", type: "number" },
     {
@@ -45,6 +46,7 @@ const mockMetricsByExercise: Record<string, Metric[]> = {
 };
 
 export default function WorkoutTracker() {
+  const token = AuthStorageService.getToken();
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
     null,
   );
@@ -58,7 +60,7 @@ export default function WorkoutTracker() {
         "/workout-tracker/exerciseNames",
         {
           headers: {
-            Authorization: `Bearer ${AuthStorageService.getToken()}`,
+            Authorization: `Bearer ${token}`,
           },
         },
       );
@@ -72,19 +74,49 @@ export default function WorkoutTracker() {
     fetchExercises();
   }, []);
 
-  const fetchMetrics = (exerciseId: string) => {
+  const fetchMetrics = (exerciseId: number) => {
     return mockMetricsByExercise[exerciseId] || [];
   };
 
-  const handleExerciseChange = (_: any, value: Exercise | null) => {
+  const fetchExerciseDetails = async (exerciseId: number) => {
+    try {
+      const response = await axios.get<ExerciseDetails>(
+        `/workout-tracker/exerciseDetails/${exerciseId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching exercise details:", error);
+      return null;
+    }
+  };
+
+  const handleExerciseChange = async (_: any, value: Exercise | null) => {
     setSelectedExercise(value);
 
     if (value) {
-      const fetchedMetrics = fetchMetrics(value.id);
-      setMetrics(fetchedMetrics);
+      const exerciseDetails = await fetchExerciseDetails(value.id);
 
+      if (!exerciseDetails) return;
+
+      // Convert backend metrics → UI metrics
+      const transformedMetrics: Metric[] = exerciseDetails.metrics.map((m) => ({
+        id: m.id.toString(),
+        name: m.name,
+        type: "number", // assuming all numeric for now
+        unit: m.units,
+      }));
+
+      setMetrics(transformedMetrics);
+
+      // Initialize form values
       const initialValues: Record<string, any> = {};
-      fetchedMetrics.forEach((m) => {
+      transformedMetrics.forEach((m) => {
         initialValues[m.id] = "";
       });
       setFormValues(initialValues);

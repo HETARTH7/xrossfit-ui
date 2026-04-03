@@ -1,5 +1,5 @@
 export interface Exercise {
-  id: string;
+  id: number;
   exerciseName: string;
   exerciseType: string;
 }
