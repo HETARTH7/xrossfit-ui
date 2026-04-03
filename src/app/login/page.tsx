@@ -7,7 +7,7 @@ import { AxiosError } from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthServices } from "@/lib/services/AuthService";
-import { LoginResponse } from "@/lib/types/auth/LoginResponse";
+import { LoginResponse } from "@/lib/interfaces/auth/LoginResponse";
 import { AuthStorageService } from "@/lib/services/AuthStorageService";
 import {
   EMAIL_REGEX,
@@ -81,13 +81,13 @@ export default function Login() {
       toast.success(MSG_LOGIN_SUCCESS);
       AuthStorageService.saveAuth(
         loginResponse.token,
-        loginResponse.displayName
+        loginResponse.displayName,
       );
       !loginResponse.emailVerified
         ? router.push(`${ROUTE_CONFIRM_EMAIL}/${form.email}`)
         : loginResponse.role == "USER"
-        ? router.push(ROUTE_HOME)
-        : router.push(ROUTE_ADMIN);
+          ? router.push(ROUTE_HOME)
+          : router.push(ROUTE_ADMIN);
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data.error);

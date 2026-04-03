@@ -1,8 +1,8 @@
 import axios from "@/api/axios";
-import { LoginRequest } from "@/lib/types/auth/LoginRequest";
-import { LoginResponse } from "@/lib/types/auth/LoginResponse";
-import { SignupRequest } from "@/lib/types/auth/SignupRequest";
-import { SignupResponse } from "@/lib/types/auth/SignupResponse";
+import { LoginRequest } from "@/lib/interfaces/auth/LoginRequest";
+import { LoginResponse } from "@/lib/interfaces/auth/LoginResponse";
+import { SignupRequest } from "@/lib/interfaces/auth/SignupRequest";
+import { SignupResponse } from "@/lib/interfaces/auth/SignupResponse";
 import { LOGIN_URL, SIGNUP_URL } from "../constants";
 
 export const AuthServices = {
