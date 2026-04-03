@@ -131,6 +131,18 @@ export default function WorkoutTracker() {
             getOptionLabel={(option) => option.exerciseName}
             value={selectedExercise}
             onChange={handleExerciseChange}
+            renderOption={(props, option) => {
+              const { key, ...rest } = props;
+
+              return (
+                <li key={key} {...rest} className="flex items-center gap-2">
+                  <span className="font-medium">{option.exerciseName}</span>
+                  <span className="text-sm text-gray-400">
+                    ({option.exerciseType})
+                  </span>
+                </li>
+              );
+            }}
             renderInput={(params) => (
               <TextField {...params} label="Select Exercise" fullWidth />
             )}
