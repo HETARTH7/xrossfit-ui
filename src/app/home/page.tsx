@@ -9,6 +9,8 @@ import { AuthStorageService } from "@/lib/services/AuthStorageService";
 import { ExerciseDetails } from "@/lib/interfaces/workouttracker/ExerciseDetails";
 import { Metrics } from "@/lib/interfaces/workouttracker/Metrics";
 import { toast, ToastContainer } from "react-toastify";
+import WorkoutLogsList from "@/components/WorkoutLogsList";
+import { WorkoutLog } from "@/lib/interfaces/workouttracker/WorkoutLog";
 
 export default function WorkoutTracker() {
   const token = AuthStorageService.getToken();
@@ -19,6 +21,7 @@ export default function WorkoutTracker() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [metrics, setMetrics] = useState<Metrics[]>([]);
   const [formValues, setFormValues] = useState<Record<number, string>>({});
+  const [logs, setLogs] = useState<WorkoutLog[]>([]);
 
   const fetchExercises = async () => {
     try {
@@ -57,6 +60,23 @@ export default function WorkoutTracker() {
       return null;
     }
   };
+
+  const fetchWorkoutLogs = async () => {
+    try {
+      const response = await axios.get<WorkoutLog[]>("/workout-tracker/logs", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setLogs(response.data);
+    } catch (error) {
+      console.error("Error fetching workout logs:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkoutLogs();
+  }, []);
 
   const handleExerciseChange = async (_: any, value: Exercise | null) => {
     setSelectedExercise(value);
@@ -175,6 +195,7 @@ export default function WorkoutTracker() {
           </Button>
         </div>
       </div>
+      <WorkoutLogsList logs={logs} />
     </div>
   );
 }
