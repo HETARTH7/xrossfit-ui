@@ -13,7 +13,11 @@ import WorkoutLogsList from "@/components/WorkoutLogsList";
 import { WorkoutLog } from "@/lib/interfaces/workouttracker/WorkoutLog";
 
 export default function WorkoutTracker() {
-  const token = AuthStorageService.getToken();
+  const [token, setToken] = useState<string | null>(null);
+  useEffect(() => {
+    setToken(AuthStorageService.getToken());
+    fetchExercises();
+  }, []);
 
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
     null,
@@ -40,8 +44,11 @@ export default function WorkoutTracker() {
   };
 
   useEffect(() => {
-    fetchExercises();
-  }, []);
+    if (token) {
+      fetchExercises();
+      fetchWorkoutLogs();
+    }
+  }, [token]);
 
   const fetchExerciseDetails = async (exerciseId: number) => {
     try {
@@ -73,10 +80,6 @@ export default function WorkoutTracker() {
       console.error("Error fetching workout logs:", error);
     }
   };
-
-  useEffect(() => {
-    fetchWorkoutLogs();
-  }, []);
 
   const handleExerciseChange = async (_: any, value: Exercise | null) => {
     setSelectedExercise(value);
@@ -125,6 +128,7 @@ export default function WorkoutTracker() {
       });
 
       console.log("Workout logged successfully:", response.data);
+      fetchWorkoutLogs();
       setSelectedExercise(null);
       setMetrics([]);
       setFormValues({});
@@ -145,7 +149,6 @@ export default function WorkoutTracker() {
             Workout Tracker
           </h1>
 
-          {/* Exercise Dropdown */}
           <Autocomplete
             options={exercises}
             getOptionLabel={(option) => option.exerciseName}
@@ -153,7 +156,6 @@ export default function WorkoutTracker() {
             onChange={handleExerciseChange}
             renderOption={(props, option) => {
               const { key, ...rest } = props;
-
               return (
                 <li key={key} {...rest} className="flex items-center gap-2">
                   <span className="font-medium">{option.exerciseName}</span>
@@ -167,8 +169,6 @@ export default function WorkoutTracker() {
               <TextField {...params} label="Select Exercise" fullWidth />
             )}
           />
-
-          {/* Metrics Form */}
           {metrics.length > 0 && (
             <div className="space-y-4">
               {metrics.map((metric) => (
@@ -183,8 +183,6 @@ export default function WorkoutTracker() {
               ))}
             </div>
           )}
-
-          {/* Submit */}
           <Button
             variant="contained"
             fullWidth

@@ -18,7 +18,6 @@ export default function WorkoutLogsList({ logs }: Props) {
   return (
     <div className="space-y-3 mt-6">
       {logs.map((log) => {
-        // Convert metrics → "30 min, 5 km"
         const metricsText = log.logMetrics
           .map((metric) => `${metric.metricValue} ${metric.metricUnit}`)
           .join(", ");
@@ -28,7 +27,6 @@ export default function WorkoutLogsList({ logs }: Props) {
             key={log.logId}
             className="bg-white shadow-sm rounded-lg px-4 py-3 border flex justify-between items-center"
           >
-            {/* Left: Sentence */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-medium">{log.exerciseName}</span>
 
@@ -40,8 +38,6 @@ export default function WorkoutLogsList({ logs }: Props) {
                 <span className="text-gray-600">• {metricsText}</span>
               )}
             </div>
-
-            {/* Right: Timestamp */}
             <span className="text-xs text-gray-400 whitespace-nowrap">
               {new Date(log.timestamp).toLocaleString()}
             </span>
