@@ -14,6 +14,7 @@ import { WorkoutLog } from "@/lib/interfaces/workouttracker/WorkoutLog";
 
 export default function WorkoutTracker() {
   const [token, setToken] = useState<string | null>(null);
+
   useEffect(() => {
     setToken(AuthStorageService.getToken());
     fetchExercises();
@@ -30,7 +31,7 @@ export default function WorkoutTracker() {
   const fetchExercises = async () => {
     try {
       const response = await axios.get<Exercise[]>(
-        "/workout-tracker/exerciseNames",
+        "/workout-tracker/exercises",
         {
           headers: {
             Authorization: `Bearer ${token}`,

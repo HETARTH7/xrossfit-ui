@@ -3,12 +3,17 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, Button } from "@mui/material";
+import { AuthStorageService } from "@/lib/services/AuthStorageService";
 
 export default function Navbar() {
   const router = useRouter();
 
-  const handleNavigate = () => {
+  const handleLogout = () => {
     router.push("/home");
+  };
+
+  const navigateToProfile = () => {
+    router.push(`/user/${AuthStorageService.getUsername()}`);
   };
 
   return (
@@ -23,10 +28,10 @@ export default function Navbar() {
       {/* Right: Profile + Logout */}
       <div className="flex items-center gap-4">
         {/* Profile Icon */}
-        <Avatar className="cursor-pointer" onClick={handleNavigate} />
+        <Avatar className="cursor-pointer" onClick={navigateToProfile} />
 
         {/* Logout Button */}
-        <Button variant="outlined" color="error" onClick={handleNavigate}>
+        <Button variant="outlined" color="error" onClick={handleLogout}>
           Logout
         </Button>
       </div>
